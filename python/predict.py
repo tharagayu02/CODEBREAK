@@ -25,19 +25,13 @@ class ConceptGapPredictor:
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         
         if not os.path.isabs(model_path):
-            candidate = os.path.join(base_dir, model_path)
-            if os.path.exists(candidate) or not os.path.exists(model_path):
-                model_path = candidate
+            model_path = os.path.join(base_dir, model_path)
 
         if not os.path.isabs(encoder_path):
-            candidate = os.path.join(base_dir, encoder_path)
-            if os.path.exists(candidate) or not os.path.exists(encoder_path):
-                encoder_path = candidate
+            encoder_path = os.path.join(base_dir, encoder_path)
 
         if not os.path.isabs(db_path):
-            candidate = os.path.join(base_dir, db_path)
-            if os.path.exists(candidate) or not os.path.exists(db_path):
-                db_path = candidate
+            db_path = os.path.join(base_dir, db_path)
 
         self.model_path = model_path
         self.encoder_path = encoder_path
@@ -66,7 +60,7 @@ class ConceptGapPredictor:
         self.feature_engineer = FeatureEngineer()
         self.feature_engineer.load_encoders(self.encoder_path)
         
-        model_artifact = joblib.load(model_path)
+        model_artifact = joblib.load(self.model_path)
         self.model = model_artifact["model"]
         self.model_name = model_artifact["model_name"]
         self.unique_concepts = model_artifact["unique_concepts"]

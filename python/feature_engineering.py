@@ -104,6 +104,10 @@ class FeatureEngineer:
         return X_combined
 
     def save_encoders(self, filepath: str = "models/feature_encoder.pkl"):
+        if not os.path.isabs(filepath):
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            filepath = os.path.join(base_dir, filepath)
+            
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         joblib.dump({
             'error_type_encoder': self.error_type_encoder,
@@ -112,6 +116,12 @@ class FeatureEngineer:
         print(f"Feature encoders saved to {filepath}")
 
     def load_encoders(self, filepath: str = "models/feature_encoder.pkl"):
+        if not os.path.isabs(filepath):
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            candidate = os.path.join(base_dir, filepath)
+            if os.path.exists(candidate) or not os.path.exists(filepath):
+                filepath = candidate
+
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"Feature encoder file not found at {filepath}")
         data = joblib.load(filepath)

@@ -21,6 +21,13 @@ except Exception:
     HAS_XGBOOST = False
 
 def train_and_evaluate(dataset_path: str = "data/concept_error_dataset.csv"):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    
+    if not os.path.isabs(dataset_path):
+        candidate = os.path.join(base_dir, dataset_path)
+        if os.path.exists(candidate) or not os.path.exists(dataset_path):
+            dataset_path = candidate
+
     if not os.path.exists(dataset_path):
         raise FileNotFoundError(f"Dataset not found at {dataset_path}. Please run create_dataset.py first.")
 
@@ -39,7 +46,8 @@ def train_and_evaluate(dataset_path: str = "data/concept_error_dataset.csv"):
     X = fe.prepare_feature_matrix(df)
 
     # Save feature encoders
-    fe.save_encoders("models/feature_encoder.pkl")
+    encoder_path = os.path.join(base_dir, "models", "feature_encoder.pkl")
+    fe.save_encoders(encoder_path)
 
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(
@@ -131,7 +139,8 @@ def train_and_evaluate(dataset_path: str = "data/concept_error_dataset.csv"):
         robust_label_map[concept] = concept
 
     # Save model artifacts
-    os.makedirs("models", exist_ok=True)
+    model_path = os.path.join(base_dir, "models", "concept_gap_model.pkl")
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
     model_artifact = {
         "model": best_model,
         "model_name": best_model_name,
@@ -139,7 +148,6 @@ def train_and_evaluate(dataset_path: str = "data/concept_error_dataset.csv"):
         "concept_to_label": concept_to_label,
         "label_to_concept": robust_label_map
     }
-    model_path = "models/concept_gap_model.pkl"
     joblib.dump(model_artifact, model_path)
     print(f"\nBest trained model ({best_model_name}) saved to {model_path}")
 
