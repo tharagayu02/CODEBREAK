@@ -41,10 +41,30 @@ class ConceptGapPredictor:
 
         self.model_path = model_path
         self.encoder_path = encoder_path
+
+        # Auto-train models on startup if missing (e.g. during cloud deployment)
+        if not os.path.exists(self.model_path) or not os.path.exists(self.encoder_path):
+            os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
+            print(f"Model artifacts missing. Auto-training model at {self.model_path}...")
+            try:
+                from python.train_model import train_and_evaluate
+            except ImportError:
+                from train_model import train_and_evaluate
+            
+            dataset_path = os.path.join(base_dir, "data", "concept_error_dataset.csv")
+            if not os.path.exists(dataset_path):
+                try:
+                    from python.create_dataset import generate_synthetic_dataset
+                except ImportError:
+                    from create_dataset import generate_synthetic_dataset
+                generate_synthetic_dataset(dataset_path)
+
+            train_and_evaluate(dataset_path)
+
         self.db = StudentDatabase(db_path)
         
         self.feature_engineer = FeatureEngineer()
-        self.feature_engineer.load_encoders(encoder_path)
+        self.feature_engineer.load_encoders(self.encoder_path)
         
         model_artifact = joblib.load(model_path)
         self.model = model_artifact["model"]

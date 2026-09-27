@@ -269,7 +269,16 @@ st.markdown("""
 # Initialize Core Services
 @st.cache_resource
 def load_services():
-    predictor = ConceptGapPredictor()
+    try:
+        predictor = ConceptGapPredictor()
+    except Exception:
+        try:
+            from python.train_model import train_and_evaluate
+        except ImportError:
+            from train_model import train_and_evaluate
+        train_and_evaluate()
+        predictor = ConceptGapPredictor()
+
     explainer = AIConceptExplainer()
     db = StudentDatabase()
     r_runner = RRunner()
@@ -278,7 +287,7 @@ def load_services():
 try:
     predictor, explainer, db, r_runner = load_services()
 except Exception as e:
-    st.error(f"Error loading system models: {e}. Make sure model is trained by running `python python/train_model.py`!")
+    st.error(f"Error loading system models: {e}. Please ensure dataset is present at `data/concept_error_dataset.csv`!")
     st.stop()
 
 # Initialize Session State for User Auth
