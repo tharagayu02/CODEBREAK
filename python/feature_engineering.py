@@ -112,6 +112,10 @@ class FeatureEngineer:
         print(f"Feature encoders saved to {filepath}")
 
     def load_encoders(self, filepath: str = "models/feature_encoder.pkl"):
+        print(f"DEBUG encoder path: {filepath}")
+        print(f"DEBUG absolute encoder path: {os.path.abspath(filepath)}")
+        print(f"DEBUG encoder exists: {os.path.exists(filepath)}")
+
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"Feature encoder file not found at {filepath}")
         data = joblib.load(filepath)
